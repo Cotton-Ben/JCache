@@ -37,7 +37,11 @@
         <osgi.version>5.0.0</osgi.version>
     </properties>
     <dependencies>
-
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>7.0.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-off-heap</artifactId>
@@ -73,8 +77,8 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.1.1</version>
             <scope>test</scope>
+            <version>6.1.1</version>
         </dependency>
 
 
