@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.infinispan:infinispan-off-heap:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-core:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-commons:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.1.2.GA" level="project" />
@@ -18,9 +19,6 @@
     <orderEntry type="library" name="Maven: org.jboss.spec.javax.transaction:jboss-transaction-api_1.1_spec:1.0.1.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.marshalling:jboss-marshalling-river:1.4.4.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.marshalling:jboss-marshalling:1.4.4.Final" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.8.8" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jboss.arquillian.testng:arquillian-testng-container:1.1.3.Final" level="project" />
-    <orderEntry type="library" name="Maven: org.infinispan:infinispan-off-heap:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: javax.cache:cache-api:1.0.0-PFD" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-cdi:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-client-hotrod:7.0.0-SNAPSHOT" level="project" />
@@ -108,6 +106,11 @@
     <orderEntry type="library" name="Maven: org.ops4j.pax.swissbox:pax-swissbox-bnd:1.7.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.felix:org.apache.felix.framework:4.2.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.infinispan:infinispan-core:test-jar:tests:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.beanshell:bsh:2.0b4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.12" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.yaml:snakeyaml:1.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jboss.arquillian.testng:arquillian-testng-container:1.1.3.Final" level="project" />
   </component>
 </module>
 
