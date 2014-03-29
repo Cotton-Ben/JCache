@@ -57,7 +57,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		DataContainer ohjcacheDataContainer =new OffHeapDefaultDataContainer(
 				String.class,
 				BondVOInterface.class,
-				"BondVoOperand",
+				"net.openhft.jcache.OffHeapDefaultDataContainerTest",
 				512,
 				256
 		);
