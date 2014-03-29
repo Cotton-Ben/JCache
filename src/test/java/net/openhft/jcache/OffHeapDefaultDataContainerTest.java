@@ -1,6 +1,6 @@
 package net.openhft.jcache;
 
-//import org.infinispan.offheap.BondVOInterface;
+
 import net.openhft.lang.model.DataValueClasses;
 import org.infinispan.container.DataContainer;
 import org.infinispan.container.entries.InternalCacheEntry;
@@ -25,6 +25,7 @@ import static org.testng.AssertJUnit.assertEquals;
 /**
  * @author ben.cotton@jpmorgan.com
  * @author dmitry.gordeev@jpmorgan.com
+ * @author xiaoming.wang@jpmorgan.com
  *
  * modeled from RedHat's original SimpleDataContainerTest.java
  */
