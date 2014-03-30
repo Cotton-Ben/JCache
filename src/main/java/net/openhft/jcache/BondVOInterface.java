@@ -1,59 +1,82 @@
+/*
+ * Copyright 2013 Peter Lawrey
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.openhft.jcache;
 
-import net.openhft.lang.io.Bytes;
 import net.openhft.lang.model.constraints.MaxSize;
-//import org.infinispan.offheap.container.entries.OffHeapInternalCacheEntry;
-
 
 public interface BondVOInterface {
+    /* add support for entry based locking */
+    void busyLockEntry() throws InterruptedException;
 
-	/* add support for entry based locking */
-	void busyLockEntry() throws InterruptedException;
-	void unlockEntry();
+    void unlockEntry();
 
-	void setRecord(Bytes record);
-	Bytes getRecord();
+    long getIssueDate();
 
-	void setEntry(Bytes entry);
-	Bytes getEntry();
+    void setIssueDate(long issueDate);  /* time in millis */
 
-	long getIssueDate();
-	void setIssueDate(long issueDate);  /* time in millis */
+    long getMaturityDate();
 
-	long getMaturityDate();
-	void setMaturityDate(long maturityDate);  /* time in millis */
+    void setMaturityDate(long maturityDate);  /* time in millis */
 
-	long addAtomicMaturityDate(long toAdd);
+    long addAtomicMaturityDate(long toAdd);
 
-	double getCoupon();
-	void setCoupon(double coupon);
+    double getCoupon();
 
-	double addAtomicCoupon(double toAdd);
+    void setCoupon(double coupon);
 
-	void setSymbol(@MaxSize(20) String symbol);
-	String getSymbol();
+    double addAtomicCoupon(double toAdd);
 
-	//OpenHFT Off-Heap array[ ] processing notice ‘At’ suffix
-	void setMarketPxIntraDayHistoryAt(@MaxSize(7) int tradingDayHour, MarketPx mPx);
-	MarketPx getMarketPxIntraDayHistoryAt(int tradingDayHour);
+    void setSymbol(@MaxSize(20) String symbol);
 
-	/* nested interface - empowering an Off-Heap hierarchical “TIER of prices”
-	as array[ ] value */
-	interface MarketPx {
-		double getCallPx();
-		void setCallPx(double px);
+    String getSymbol();
 
-		double getParPx();
-		void setParPx(double px);
+    // OpenHFT Off-Heap array[ ] processing notice ‘At’ suffix
+    void setMarketPxIntraDayHistoryAt(@MaxSize(7) int tradingDayHour, MarketPx mPx);
 
-		double getMaturityPx();
-		void setMaturityPx(double px);
+    /* 7 Hours in the Trading Day:
+     * index_0 = 9.30am,
+     * index_1 = 10.30am,
+     …,
+     * index_6 = 4.30pm
+     */
 
-		double getBidPx();
-		void setBidPx(double px);
+    MarketPx getMarketPxIntraDayHistoryAt(int tradingDayHour);
 
-		double getAskPx();
-		void setAskPx(double px);
-	}
+    /* nested interface - empowering an Off-Heap hierarchical “TIER of prices”
+    as array[ ] value */
+    interface MarketPx {
+        double getCallPx();
+
+        void setCallPx(double px);
+
+        double getParPx();
+
+        void setParPx(double px);
+
+        double getMaturityPx();
+
+        void setMaturityPx(double px);
+
+        double getBidPx();
+
+        void setBidPx(double px);
+
+        double getAskPx();
+
+        void setAskPx(double px);
+    }
 }
-

@@ -1,6 +1,8 @@
 package net.openhft.jcache;
 
 
+import net.openhft.collections.SharedHashMap;
+import net.openhft.collections.SharedHashMapBuilder;
 import net.openhft.lang.model.DataValueClasses;
 import org.infinispan.container.DataContainer;
 import org.infinispan.container.entries.InternalCacheEntry;
@@ -14,6 +16,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,14 +38,23 @@ import static org.testng.AssertJUnit.assertEquals;
 @Test(groups = "unit", testName = "jcache.OffHeapDataContainerTest")
 public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	DataContainer jcacheDataContainer;
+    SharedHashMap<String, BondVOInterface> shm;
 
 
 	@BeforeMethod
-	public void setUp() throws InterruptedException {
+	public void setUp() throws InterruptedException, IOException {
 
 		Thread.sleep(2000);
 		System.out.println("ISPN7 JCACHE DataContainer view of OpenHFT SHM is being created");
 		this.jcacheDataContainer = createJcacheContainer();
+        this.shm = new SharedHashMapBuilder()
+                .generatedValueType(true)
+                .entrySize(512)
+                .create(
+                        new File("/dev/shm/openHFT_SHM"),
+                        String.class,
+                        BondVOInterface.class
+                );
 		Thread.sleep(2000);
 		System.out.println("ISPN7 JCACHE DataContainer created jcacheDataContainer=["+jcacheDataContainer.toString()+"]");
 		Thread.sleep(2000);
@@ -50,6 +63,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	@AfterMethod
 	public void tearDown() {
 		this.jcacheDataContainer = null;
+        this.shm = null;
 	}
 
 
@@ -72,34 +86,33 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	public void testOpenHFTasOffHeapJcacheOperandProvider() throws InterruptedException {
 		//TODO: build a join to OpenHFT MetaData - this comes in OpenHFT 3.0d
 
-
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
 
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
-						.maxIdle(100,
-								TimeUnit.MINUTES)
+						.maxIdle(100,TimeUnit.MINUTES)
 						.build()
 		);
 		Thread.sleep(2000);
-		System.out.println("ISPN7 JCACHE put() the BondVOInterface (IBMHY2044) into DataContainer bondV=["+bondV+"]");
+		System.out.println("ISPN7 JCACHE put() the BondVOInterface (\"369604103\") into DataContainer bondV=["+bondV+"]");
 
 		Thread.sleep(2000);
-		System.out.println("Using ISPN7 JCACHE to get(IBMHT2044) BondVOInterface <--  DataContainer (bondV=["+bondV+"])");
+		System.out.println("Using ISPN7 JCACHE to get(\"369604103\") BondVOInterface <--  DataContainer (bondV=["+bondV+"])");
 
 		Thread.sleep(2000);
-		InternalCacheEntry bondEntry = this.jcacheDataContainer.get("IBMHY2044");
+		InternalCacheEntry bondEntry = this.jcacheDataContainer.get("369604103");
 
 		Thread.sleep(2000);
-		System.out.println("ISPN7 JCACHE got the (IBMHT2044) BondVOInterface from  DataContainer (entry.getSymbol()=["+
+		System.out.println("ISPN7 JCACHE got the (\"369604103\") BondVOInterface from  DataContainer (entry.getSymbol()=["+
 				((BondVOInterface) bondEntry).getSymbol() +
 				"])");
 
@@ -108,10 +121,10 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		assert bondEntry.getLastUsed() <= System.currentTimeMillis();
 		long entryLastUsed = bondEntry.getLastUsed();
 		Thread.sleep(2000);
-		bondEntry = this.jcacheDataContainer.get("IBMHY2044");
+		bondEntry = this.jcacheDataContainer.get("369604103");
 		assert bondEntry.getLastUsed() > entryLastUsed;
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -121,7 +134,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		this.jcacheDataContainer.purgeExpired();
 
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -131,17 +144,17 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		Thread.sleep(2000);
 		assert this.jcacheDataContainer.size() == 1;
 
-		bondEntry= jcacheDataContainer.get("IBMHY2044");
+		bondEntry= jcacheDataContainer.get("369604103");
 		assert bondEntry != null : "Entry should not be null!";
 		assert bondEntry.getClass().equals(mortaltype()) : "Expected "+mortaltype()+", was " + bondEntry.getClass().getSimpleName();
 		assert bondEntry.getCreated() <= System.currentTimeMillis();
 
-		this.jcacheDataContainer.put("IBMHY2044", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(0, TimeUnit.MINUTES).build());
+		this.jcacheDataContainer.put("369604103", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(0, TimeUnit.MINUTES).build());
 		Thread.sleep(10);
 		assert this.jcacheDataContainer.get("k") == null;
 		assert this.jcacheDataContainer.size() == 0;
 
-		this.jcacheDataContainer.put("IBMHY2044", "v", new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(0, TimeUnit.MINUTES).build());
+		this.jcacheDataContainer.put("369604103", "v", new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(0, TimeUnit.MINUTES).build());
 		Thread.sleep(100);
 		assert this.jcacheDataContainer.size() == 1;
 		this.jcacheDataContainer.purgeExpired();
@@ -156,12 +169,13 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	public void testResetOfCreationTime() throws Exception {
 		long now = System.currentTimeMillis();
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -172,7 +186,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		assert created1 >= now;
 		Thread.sleep(100);
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -187,25 +201,26 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	public void testUpdatingLastUsed() throws Exception {
 		long idle = 600000;
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 		this.jcacheDataContainer.put(
-				"IBMHY2044",
+                "369604103",
 				bondV,
 				new OffHeapEmbeddedMetadata.OffHeapBuilder()
 						.build()
 		);
-		InternalCacheEntry ice = this.jcacheDataContainer.get("k");
+		InternalCacheEntry ice = this.jcacheDataContainer.get("369604103");
 		assert ice.getClass().equals(immortaltype());
 		assert ice.toInternalCacheValue().getExpiryTime() == -1;
 		assert ice.getMaxIdle() == -1;
 		assert ice.getLifespan() == -1;
-		this.jcacheDataContainer.put("IBMHY2044", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(idle, TimeUnit.MILLISECONDS).build());
+		this.jcacheDataContainer.put("369604103", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(idle, TimeUnit.MILLISECONDS).build());
 		long oldTime = System.currentTimeMillis();
 		Thread.sleep(100); // for time calc granularity
-		ice =this.jcacheDataContainer.get("IBMHY2044");
+		ice =this.jcacheDataContainer.get("369604103");
 		assert ice.getClass().equals(transienttype());
 		assert ice.toInternalCacheValue().getExpiryTime() > -1;
 		assert ice.getLastUsed() > oldTime;
@@ -216,7 +231,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 		oldTime = System.currentTimeMillis();
 		Thread.sleep(100); // for time calc granularity
-		assert this.jcacheDataContainer.get("IBMHY2044") != null;
+		assert this.jcacheDataContainer.get("369604103") != null;
 
 		// check that the last used stamp has been updated on a get
 		assert ice.getLastUsed() > oldTime;
@@ -243,13 +258,14 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 	public void testExpirableToImmortalAndBack() {
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
 		String value = "v";
-		this.jcacheDataContainer.put("IBMHY2044", value, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
+		this.jcacheDataContainer.put("369604103", value, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
 		assertContainerEntry(this.mortaltype(), value);
 
 		value = "v2";
@@ -280,8 +296,8 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 			Class<? extends InternalCacheEntry> type,
 			String expectedValue
 	) {
-		assert this.jcacheDataContainer.containsKey("IBMHY2044");
-		InternalCacheEntry entry = this.jcacheDataContainer.get("IBMHY2044");
+		assert this.jcacheDataContainer.containsKey("369604103");
+		InternalCacheEntry entry = this.jcacheDataContainer.get("369604103");
 		assertEquals(type, entry.getClass());
 		assertEquals(expectedValue, entry.getValue());
 	}
@@ -289,22 +305,24 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 
 	public void testKeySet() {
+
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
 		this.jcacheDataContainer.put(
-				"k1",
+                "369603001",
 				bondV,
 				new OffHeapEmbeddedMetadata.OffHeapBuilder()
 						.lifespan(100, TimeUnit.MINUTES)
 						.build()
 		);
-		this.jcacheDataContainer.put("k2", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
+		this.jcacheDataContainer.put("369603002", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
 		this.jcacheDataContainer.put(
-				"k3",
+                "369603002",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -312,7 +330,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 						.build()
 		);
 		this.jcacheDataContainer.put(
-				"k4",
+                "369603003",
 				bondV,
 				new OffHeapEmbeddedMetadata
 						.OffHeapBuilder()
@@ -322,10 +340,10 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 		);
 
 		Set<String> expected = new HashSet<String>();
-		expected.add("k1");
-		expected.add("k2");
-		expected.add("k3");
-		expected.add("k4");
+		expected.add("369603001");
+		expected.add("369603002");
+		expected.add("369603003");
+		expected.add("369603004");
 
 		for (Object o : this.jcacheDataContainer.keySet()) {
 			assert expected.remove(o);
@@ -338,7 +356,8 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	public void testContainerIteration() {
 
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
@@ -370,10 +389,10 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 						.build());
 
 		Set<String> expected = new HashSet<String>();
-		expected.add("k1");
-		expected.add("k2");
-		expected.add("k3");
-		expected.add("k4");
+		expected.add("369603001");
+		expected.add("369603002");
+		expected.add("369603003");
+		expected.add("369603004");
 
 		for (InternalCacheEntry ice : jcacheDataContainer) {
 			assert expected.remove(ice.getKey());
@@ -385,22 +404,23 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 	public void testKeys() {
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
-		jcacheDataContainer.put("k1", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k2", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
-		jcacheDataContainer.put("k3", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k4", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
+		jcacheDataContainer.put("369603001", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603002", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
+		jcacheDataContainer.put("369603003", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603004", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
 				.maxIdle(100, TimeUnit.MINUTES).lifespan(100, TimeUnit.MINUTES).build());
 
 		Set<String> expected = new HashSet<String>();
-		expected.add("k1");
-		expected.add("k2");
-		expected.add("k3");
-		expected.add("k4");
+		expected.add("369603001");
+		expected.add("369603002");
+		expected.add("369603003");
+		expected.add("369603004");
 
 		for (Object o : jcacheDataContainer.keySet()) assert expected.remove(o);
 
@@ -410,23 +430,24 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 	public void testValues() {
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
 
-		jcacheDataContainer.put("k1", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k2", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
-		jcacheDataContainer.put("k3", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k4", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
+		jcacheDataContainer.put("369603001", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603002", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
+		jcacheDataContainer.put("369603003", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603004", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
 				.maxIdle(100, TimeUnit.MINUTES).lifespan(100, TimeUnit.MINUTES).build());
 
 		Set<String> expected = new HashSet<String>();
-		expected.add("v1");
-		expected.add("v2");
-		expected.add("v3");
-		expected.add("v4");
+        expected.add("369603001");
+        expected.add("369603002");
+        expected.add("369603003");
+        expected.add("369603004");
 
 		for (Object o : jcacheDataContainer.values()) assert expected.remove(o);
 
@@ -436,22 +457,23 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 	public void testEntrySet() {
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
 
-		jcacheDataContainer.put("k1", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k2", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
-		jcacheDataContainer.put("k3", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
-		jcacheDataContainer.put("k4", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
+		jcacheDataContainer.put("369603001", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().lifespan(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603002", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().build());
+		jcacheDataContainer.put("369603003", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder().maxIdle(100, TimeUnit.MINUTES).build());
+		jcacheDataContainer.put("369603004", bondV, new OffHeapEmbeddedMetadata.OffHeapBuilder()
 				.maxIdle(100, TimeUnit.MINUTES).lifespan(100, TimeUnit.MINUTES).build());
 
 		Set<InternalCacheEntry> expected = new HashSet<InternalCacheEntry>();
-		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("k1")));
-		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("k2")));
-		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("k3")));
-		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("k4")));
+		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("369603001")));
+		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("369603002")));
+		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("369603003")));
+		expected.add(OffHeapCoreImmutables.immutableInternalCacheEntry(jcacheDataContainer.get("369603004")));
 
 		Set<Map.Entry<Object,Object>> actual = new HashSet<Map.Entry<Object, Object>>();
 		for (Map.Entry<Object, Object> o : jcacheDataContainer.entrySet()) actual.add(o);
@@ -462,7 +484,8 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 	public void testGetDuringKeySetLoop() {
 		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
-		bondV.setSymbol("IBM_HIGH_YIELD_30_YR_5.5");
+        this.shm.acquireUsing("369604103", bondV);
+		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
 		bondV.setMaturityDate(20440315); //30 years
 		bondV.setCoupon(0.055); //5.5%
