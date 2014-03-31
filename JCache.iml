@@ -10,6 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="collections" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-core:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-commons:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.1.2.GA" level="project" />
@@ -20,6 +21,7 @@
     <orderEntry type="library" name="Maven: javax.cache:cache-api:1.0.0-PFD" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-cdi:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.infinispan:infinispan-client-hotrod:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.6" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.infinispan:infinispan-core:test-jar:tests:7.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.1.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.11" level="project" />
@@ -29,16 +31,18 @@
     <orderEntry type="module" module-name="collections" />
     <orderEntry type="library" name="Maven: com.intellij:annotations:12.0" level="project" />
     <orderEntry type="module-library">
-      <library name="Maven: com.sun.java:tools:1.7.0_40">
+      <library name="Maven: com.sun.java:tools:1.7.0_51">
         <CLASSES>
-          <root url="jar://C:/jdk1.7.0_45/lib/tools.jar!/" />
+          <root url="jar:///usr/lib/jvm/java-1.7.0-openjdk/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="lang" />
+    <orderEntry type="library" name="Maven: net.openhft:lang:6.3.4-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.openhft:compiler:2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: net.openhft:affinity:2.0.1" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:platform:3.5.2" level="project" />
@@ -50,7 +54,6 @@
     <orderEntry type="library" name="Maven: org.ops4j.pax.exam:pax-exam:3.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-lang:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-store:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.5.11" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-io:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-monitors:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.ops4j.base:ops4j-base-util-property:1.4.0" level="project" />

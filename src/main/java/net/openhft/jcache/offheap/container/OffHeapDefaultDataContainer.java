@@ -6,6 +6,7 @@ import net.openhft.collections.SharedHashMapBuilder;
 import org.infinispan.commons.logging.Log;
 import org.infinispan.commons.logging.LogFactory;
 //import net.openhft.jcache.commons.util.concurrent.ParallelIterableMap;
+import org.infinispan.commons.util.concurrent.ParallelIterableMap;
 import org.infinispan.container.DataContainer;
 import org.infinispan.container.InternalEntryFactory;
 import org.infinispan.container.entries.InternalCacheEntry;
@@ -229,9 +230,13 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
       }
    }
 
+	@Override
+	public <K> void executeTask(AdvancedCacheLoader.KeyFilter<K> kKeyFilter, ParallelIterableMap.KeyValueAction<Object, InternalCacheEntry> objectInternalCacheEntryKeyValueAction) throws InterruptedException {
+
+	}
 
 
-   @Override
+	@Override
    public Iterator iterator() {
 
       return new EntryIterator( entries.values().iterator() );
