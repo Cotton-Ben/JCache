@@ -159,7 +159,7 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
                 e.reincarnate(timeService.wallClockTime());
             }
         } else {
-            System.out.println("RedHat EntryFactory eF.create(k,v,metadata); eF=[" +
+            System.out.println("Oh, this is a brand new Entry<K,V>: RedHat EntryFactory eF.create(k,v,metadata); eF=[" +
                     (entryFactory != null ? entryFactory.toString():"NULL") +
                     "]");
             // this is a brand-new entry
@@ -168,7 +168,7 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
 
         if (trace)
             log.tracef("Store %s in container", e);
-
+        System.out.println("OHDDC.entries.put(k="+k+", e="+e+");");
         entries.put(k, e);
     }
 
