@@ -2,18 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>OpenHFT</artifactId>
-        <groupId>net.openhft</groupId>
-        <version>1.0</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>JCache</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.openhft</groupId>
+    <artifactId>jcache</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>JCache</name>
-    <description>OpenHFT join point as off-heap Cache provider to RedHat Infinispan</description>
+    <name>OpenHFT/JCache</name>
+    <description>OpenHFT Join to JCache provider RedHat Infinispan</description>
+
     <url>http://www.openhft.net</url>
     <licenses>
         <license>
@@ -42,11 +39,14 @@
             <artifactId>infinispan-core</artifactId>
             <version>7.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- chicken and egg thing: have to commen this out when FIRST
+        building ISPN  7 off-heap module (obviously)
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-off-heap</artifactId>
             <version>7.0.0-SNAPSHOT</version>
         </dependency>
+       -->
 
         <dependency>
             <groupId>javax.cache</groupId>

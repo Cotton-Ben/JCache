@@ -6,11 +6,11 @@ import net.openhft.collections.SharedHashMapBuilder;
 import net.openhft.lang.model.DataValueClasses;
 import org.infinispan.container.DataContainer;
 import org.infinispan.container.entries.InternalCacheEntry;
-import org.infinispan.offheap.container.OffHeapDefaultDataContainer;
-import org.infinispan.offheap.container.OffHeapInternalEntryFactoryImpl;
-import org.infinispan.offheap.container.entries.*;
-import org.infinispan.offheap.metadata.OffHeapEmbeddedMetadata;
-import org.infinispan.offheap.util.OffHeapCoreImmutables;
+import net.openhft.jcache.offheap.container.OffHeapDefaultDataContainer;
+import net.openhft.jcache.offheap.container.OffHeapInternalEntryFactoryImpl;
+import net.openhft.jcache.offheap.container.entries.*;
+import net.openhft.jcache.offheap.metadata.OffHeapEmbeddedMetadata;
+import net.openhft.jcache.offheap.util.OffHeapCoreImmutables;
 import org.infinispan.test.AbstractInfinispanTest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -69,7 +69,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 
 
 	protected DataContainer createJcacheContainer() {
-		DataContainer ohjcacheDataContainer =new OffHeapDefaultDataContainer(
+		DataContainer ohjcacheDataContainer =new OffHeapDefaultDataContainer<String, BondVOInterface>(
 				String.class,
 				BondVOInterface.class,
 				"net.openhft.jcache.OffHeapDefaultDataContainerTest",
