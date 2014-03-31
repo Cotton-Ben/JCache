@@ -12,6 +12,7 @@ import org.infinispan.container.entries.InternalCacheEntry;
 import org.infinispan.eviction.ActivationManager;
 import org.infinispan.eviction.EvictionManager;
 import org.infinispan.eviction.PassivationManager;
+import org.infinispan.factories.annotations.Inject;
 import org.infinispan.metadata.Metadata;
 import org.infinispan.persistence.manager.PersistenceManager;
 import org.infinispan.persistence.spi.AdvancedCacheLoader;
@@ -53,15 +54,17 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
            int segmentsSize) {
        try {
            long t = System.currentTimeMillis();
-           SharedHashMap<K,V> entries = new SharedHashMapBuilder()
-                   .generatedValueType(Boolean.TRUE)
-                   .entrySize(entrysSize)
-                   .minSegments(segmentsSize)
-                   .create(
-                           new File("/dev/shm/" + openHFT_OffHeap_Operand + ".@t=" + t),
-                           keyType,
-                           valueType
-                   );
+           SharedHashMap<Object, InternalCacheEntry> _entries =
+                   (SharedHashMap<Object, InternalCacheEntry>)  new SharedHashMapBuilder()
+                           .generatedValueType(Boolean.TRUE)
+                           .entrySize(entrysSize)
+                           .minSegments(segmentsSize)
+                           .create(
+                                   new File("/dev/shm/" + openHFT_OffHeap_Operand + ".@t=" + t),
+                                   keyType,
+                                   valueType
+                           );
+           this.entries = _entries;
            System.out.println("OpenHFT /dev/shm/"+openHFT_OffHeap_Operand+".@t="+t+"  entries=["+
                    (
                    (entries!=null) ? entries.toString() : "NULL"
@@ -79,25 +82,27 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
 
 
 
-//    public OffHeapDefaultDataContainer(int concurrencyLevel) {
-//    }
-/*
+    public OffHeapDefaultDataContainer(int concurrencyLevel) {
+    }
+
    @Inject
    public void initialize(
-                EvictionManager evictionManager,
-                PassivationManager passivator,
-                InternalEntryFactory entryFactory,
-                ActivationManager activator,
-                PersistenceManager clm,
-                TimeService timeService) {
-      this.evictionManager = evictionManager;
-      this.passivator = passivator;
-      this.entryFactory = entryFactory;
-      this.activator = activator;
-      this.pm = clm;
-      this.timeService = timeService;
+                                EvictionManager evictionManager,
+                                PassivationManager passivator,
+                                InternalEntryFactory entryFactory,
+                                ActivationManager activator,
+                                PersistenceManager clm,
+                                TimeService timeService
+                            ) {
+        System.out.println("RedHat Infinispan join point:  initialize ....");
+        this.evictionManager = evictionManager;
+        this.passivator = passivator;
+        this.entryFactory = entryFactory;
+        this.activator = activator;
+        this.pm = clm;
+        this.timeService = timeService;
    }
-   */
+
 
 //   public static OffHeapDataContainer boundedDataContainer(int concurrencyLevel, int maxEntries,
 //            EvictionStrategy strategy, EvictionThreadPolicy policy,
@@ -115,7 +120,7 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
 //      return new OffHeapDefaultDataContainer(concurrencyLevel);
 //   }
 
-   //@Override
+   @Override
    public InternalCacheEntry peek(Object key) {
       return entries.get(key);
    }
@@ -137,29 +142,38 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
       return e;
    }
 
-   @Override
-   public void put(Object k, Object v, Metadata metadata) {
-      InternalCacheEntry e = entries.get(k);
-      if (e != null) {
-         e.setValue(v);
-         InternalCacheEntry original = e;
-         e = entryFactory.update(e, metadata);
-         // we have the same instance. So we need to reincarnate, if mortal.
-         if (isMortalEntry(e) && original == e) {
-            e.reincarnate(timeService.wallClockTime());
-         }
-      } else {
-         // this is a brand-new entry
-         e = entryFactory.create(k, v,  metadata);
-      }
+    @Override
+    public void put(Object k, Object v, Metadata metadata) {
+        System.out.println("OHDDC.put(k="+k+",v="+v+",metaData="+metadata+");");
+        System.out.println("RedHat ICE OHDDC.entries=["+entries+"]");
+        InternalCacheEntry e = this.entries.get(k);
+        System.out.println("RedHat InternalCacheEntry entries.get(k)=[" +
+                (e != null ? e.toString():"NULL") +
+                "]");
+        if (e != null) {
+            e.setValue(v);
+            InternalCacheEntry original = e;
+            e = entryFactory.update(e, metadata);
+            // we have the same instance. So we need to reincarnate, if mortal.
+            if (isMortalEntry(e) && original == e) {
+                e.reincarnate(timeService.wallClockTime());
+            }
+        } else {
+            System.out.println("RedHat EntryFactory eF.create(k,v,metadata); eF=[" +
+                    (entryFactory != null ? entryFactory.toString():"NULL") +
+                    "]");
+            // this is a brand-new entry
+            e = this.entryFactory.create(k, v,  metadata);
+        }
 
-      if (trace)
-         log.tracef("Store %s in container", e);
+        if (trace)
+            log.tracef("Store %s in container", e);
 
-      entries.put(k, e);
-   }
+        entries.put(k, e);
+    }
 
-   private boolean isMortalEntry(InternalCacheEntry e) {
+
+    private boolean isMortalEntry(InternalCacheEntry e) {
       return e.getLifespan() > 0;
    }
 
@@ -392,8 +406,8 @@ public class OffHeapDefaultDataContainer<K,V> implements DataContainer {
 //      }
 //   }
 
-
-    public void initialize(Object o, Object o1, OffHeapInternalEntryFactoryImpl internalEntryFactory, Object o2, Object o3, TimeService timeService) {
-        System.out.println("initialize");
-    }
+//
+//    public void initialize(Object o, Object o1, OffHeapInternalEntryFactoryImpl internalEntryFactory, Object o2, Object o3, TimeService timeService) {
+//        System.out.println("initialize");
+//    }
 }

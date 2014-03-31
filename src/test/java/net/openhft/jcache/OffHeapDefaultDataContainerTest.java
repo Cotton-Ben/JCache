@@ -86,7 +86,7 @@ public class OffHeapDefaultDataContainerTest extends AbstractInfinispanTest {
 	public void testOpenHFTasOffHeapJcacheOperandProvider() throws InterruptedException {
 		//TODO: build a join to OpenHFT MetaData - this comes in OpenHFT 3.0d
 
-		BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
+        BondVOInterface bondV = DataValueClasses.newDirectReference(BondVOInterface.class);
         this.shm.acquireUsing("369604103", bondV);
 		bondV.setSymbol("IBM_HY_30_YR_5.5");
 		bondV.setIssueDate(20140315); //beware the ides of March
